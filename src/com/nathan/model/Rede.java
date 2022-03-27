@@ -199,7 +199,7 @@ public class Rede {
         pontoB[i] = pontoA[i];
         gui.publishTxtReceptor(pontoB[i] + " ");
         gui.publishTxtEmissor();
-        pausarThread(0); // 400
+        pausarThread(400); // 400
       }
       camadaFisicaReceptora(fluxoBrutoDeBits);
     }).start();
