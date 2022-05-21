@@ -1,6 +1,7 @@
 package com.nathan.controller;
 
-import com.nathan.model.camada.enlace.*;
+import com.nathan.model.camada.enlace.ctrlerro.*;
+import com.nathan.model.camada.enlace.enquadramento.*;
 import com.nathan.model.camada.fisica.Binaria;
 import com.nathan.model.camada.fisica.Manchester;
 import com.nathan.model.camada.fisica.ManchesterDiferencial;
@@ -19,8 +20,11 @@ import java.util.ResourceBundle;
 public class Controller_TelaPrincipal implements Initializable {
 
   public HBox hbox_led;
+  public HBox hboxAcks;
   public Label lbl_men;
   public Label lbl_enquad;
+  public Label lbl_protocolo;
+  public Label lbl_ctrlerro;
   public Button btn_enviar;
   public TextField txt_men;
   public MenuButton menu_cod;
@@ -31,8 +35,12 @@ public class Controller_TelaPrincipal implements Initializable {
   public CheckMenuItem menuItemEnBit;
   public CheckMenuItem menuItemEnByte;
   public CheckMenuItem menuItemEnVF;
-  public Label lbl_protocolo;
+  public CheckMenuItem menuItemEnBPP;
+  public CheckMenuItem menuItemEnBPI;
+  public CheckMenuItem menuItemEnCRC;
+  public CheckMenuItem menuItemEnHam;
   public Slider sld_speed;
+  public Slider sld_erro;
   public TextArea txt_disp01;
   public TextArea txt_disp02;
   public HBox hboxEmAp;
@@ -55,6 +63,7 @@ public class Controller_TelaPrincipal implements Initializable {
 
   private CheckMenuItem[] menuCamadaFisica;
   private CheckMenuItem[] menuEnlaceDeDadosEnquadramento;
+  private CheckMenuItem[] menuEnlaceDeDadosControleDeErro;
 
   @Override
   public void initialize(URL location, ResourceBundle resources) {
@@ -64,7 +73,7 @@ public class Controller_TelaPrincipal implements Initializable {
     camadasReceptor = new HBox[]{hboxReAp, hboxReApr, hboxReSe, hboxReTr, hboxReRe, hboxReEn, hboxReFi};
     menuCamadaFisica = new CheckMenuItem[]{menuItemBinario,menuItemManchester,menuItemManchesterDiferencial};
     menuEnlaceDeDadosEnquadramento = new CheckMenuItem[]{menuItemEnFraming, menuItemEnBit, menuItemEnByte, menuItemEnVF};
-
+    menuEnlaceDeDadosControleDeErro = new CheckMenuItem[]{menuItemEnBPP, menuItemEnBPI, menuItemEnCRC, menuItemEnHam};
   }
 
   /**
@@ -96,6 +105,18 @@ public class Controller_TelaPrincipal implements Initializable {
     return null;
   }
 
+  private ControleDeErro getControleDeErroFromMenu(){
+    if(menuItemEnBPP.isSelected())
+      return new BitParidadePar();
+    if(menuItemEnBPI.isSelected())
+      return new BitParidadeImpar();
+    if(menuItemEnCRC.isSelected())
+      return new CRC();
+    if(menuItemEnHam.isSelected())
+      return new Hamming();
+    return null;
+  }
+
   public void onClick(ActionEvent e) {
 
     if(e.getSource().equals(btn_enviar)) {
@@ -104,10 +125,10 @@ public class Controller_TelaPrincipal implements Initializable {
       lbl_men.setText("Aguardando Mensagem");
       lbl_men.setTextFill(Paint.valueOf("#868686"));
 
-      RedeGUI redeGUI = new RedeGUI(txt_men,lbl_men,hbox_led,btn_enviar, sld_speed, txt_disp01,
+      RedeGUI redeGUI = new RedeGUI(txt_men,lbl_men,hbox_led, hboxAcks, btn_enviar, sld_speed, sld_erro, txt_disp01,
           txt_disp02, camadasEmissor, camadasReceptor);
-      Rede rede = new Rede(redeGUI,getProtocoloFromMenu(), getEnquadramentoFromMenu());
-      rede.aplicacaoTransmissora();
+      Rede rede = new Rede(redeGUI,getProtocoloFromMenu(), getEnquadramentoFromMenu(), getControleDeErroFromMenu());
+      rede.start();
       btn_enviar.setDisable(true);
       return;
     }
@@ -121,6 +142,11 @@ public class Controller_TelaPrincipal implements Initializable {
     clickItemMenu(e, menuEnlaceDeDadosEnquadramento, menuItemEnByte, lbl_enquad);
     clickItemMenu(e, menuEnlaceDeDadosEnquadramento, menuItemEnVF, lbl_enquad);
 
+    clickItemMenu(e, menuEnlaceDeDadosControleDeErro, menuItemEnBPP, lbl_ctrlerro);
+    clickItemMenu(e, menuEnlaceDeDadosControleDeErro, menuItemEnBPI, lbl_ctrlerro);
+    clickItemMenu(e, menuEnlaceDeDadosControleDeErro, menuItemEnCRC, lbl_ctrlerro);
+    clickItemMenu(e, menuEnlaceDeDadosControleDeErro, menuItemEnHam, lbl_ctrlerro);
+
     if(e.getSource().equals(menuItemEnVF)){
       menuItemBinario.setDisable(true);
       lbl_protocolo.setText(menuItemManchester.getText());
@@ -130,6 +156,20 @@ public class Controller_TelaPrincipal implements Initializable {
 
     if(e.getSource().equals(menuItemEnBit) || e.getSource().equals(menuItemEnFraming) || e.getSource().equals(menuItemEnByte)){
       menuItemBinario.setDisable(false);
+    }
+
+    if(e.getSource().equals(menuItemEnBPP) || e.getSource().equals(menuItemEnBPI)){
+      for (CheckMenuItem checkMenuItem : menuEnlaceDeDadosEnquadramento) {
+        checkMenuItem.setSelected(false);
+      }
+      menuItemEnByte.setSelected(true);
+    }
+
+    if(e.getSource().equals(menuItemEnBit) && (menuItemEnBPP.isSelected() || menuItemEnBPI.isSelected())){
+      for (CheckMenuItem checkMenuItem : menuEnlaceDeDadosControleDeErro) {
+        checkMenuItem.setSelected(false);
+      }
+      menuItemEnCRC.setSelected(true);
     }
   }
 

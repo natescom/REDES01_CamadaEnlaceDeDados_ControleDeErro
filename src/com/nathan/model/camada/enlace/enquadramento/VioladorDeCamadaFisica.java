@@ -1,4 +1,8 @@
-package com.nathan.model.camada.enlace;
+package com.nathan.model.camada.enlace.enquadramento;
+
+import java.util.ArrayList;
+
+import static com.nathan.model.util.FormatFactory.arrayToString;
 
 /****************************************************************
  * Autor: Nathan Ferraz da Silva
@@ -19,8 +23,10 @@ public class VioladorDeCamadaFisica extends Enquadramento {
    * @return
    */
   @Override
-  public int[] enquadrar(int[] bits) {
-    return bits;
+  public ArrayList<int[]> enquadrar(int[] bits) {
+    ArrayList<int[]> arrayList = new ArrayList<>();
+    arrayList.add(bits);
+    return arrayList;
   }
 
   /**
@@ -29,8 +35,8 @@ public class VioladorDeCamadaFisica extends Enquadramento {
    * @return
    */
   @Override
-  public int[] desenquadrar(int[] bits) {
-    return bits;
+  public int[] desenquadrar(ArrayList<int[]> bits) {
+    return bits.get(0);
   }
 
   /**
@@ -52,8 +58,8 @@ public class VioladorDeCamadaFisica extends Enquadramento {
     }
 
     System.out.println("\nCAMADA DE ENLACE DE DADOS EMISSORA");
-    System.out.print("\tOriginal: " + arraytoString(bits));
-    System.out.println("\n\tEnquadra: " + arraytoString(novoBits));
+    System.out.print("\tOriginal: " + arrayToString(bits));
+    System.out.println("\n\tEnquadra: " + arrayToString(novoBits));
 
     return bits;
   }
@@ -74,23 +80,12 @@ public class VioladorDeCamadaFisica extends Enquadramento {
     }
 
     System.out.println("\n\nCAMADA DE ENLACE DE DADOS RECEPTORA");
-    System.out.print("\tEnquadra: " + arraytoString(bits));
-    System.out.print("\n\tOriginal: " + arraytoString(novoBits) + "\n");
+    System.out.print("\tEnquadra: " + arrayToString(bits));
+    System.out.print("\n\tOriginal: " + arrayToString(novoBits) + "\n");
 
     return bits;
   }
 
-  /**
-   * Transforma vetor numa string
-   * @param bits
-   * @return
-   */
-  private String arraytoString(int[] bits) {
-    String s = "";
-    for (int bit : bits) {
-      s += bit;
-    }
-    return s;
-  }
+
 
 }

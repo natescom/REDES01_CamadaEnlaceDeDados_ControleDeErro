@@ -1,4 +1,6 @@
-package com.nathan.model.camada.enlace;
+package com.nathan.model.camada.enlace.enquadramento;
+
+import java.util.ArrayList;
 
 /****************************************************************
  * Autor: Nathan Ferraz da Silva
@@ -19,14 +21,14 @@ public abstract class Enquadramento {
    * @param bits
    * @return
    */
-  public abstract int[] enquadrar(int[] bits);
+  public abstract ArrayList<int[]> enquadrar(int[] bits);
 
   /**
    * Retira o enquadramento da mensagem
    * @param bits
    * @return
    */
-  public abstract int[] desenquadrar(int[] bits);
+  public abstract int[] desenquadrar(ArrayList<int[]> bits);
 
   public String getMensagemOriginal() {
     return mensagemOriginal;
@@ -34,5 +36,20 @@ public abstract class Enquadramento {
 
   public String getMensagEnquadrada() {
     return mensagEnquadrada;
+  }
+
+  protected int[] juntarQuadro(ArrayList<int[]> quadros){
+    String men = "";
+    for(int[] quadro: quadros) {
+      for (int i : quadro) {
+        men += (i + "");
+      }
+    }
+    int[] bitsComIC = new int[men.length()];
+    char[] bitsComICChar = men.toCharArray();
+    for (int i = 0; i < bitsComIC.length; i++) {
+      bitsComIC[i] = Integer.parseInt(bitsComICChar[i]+"",10);
+    }
+    return bitsComIC;
   }
 }

@@ -1,4 +1,8 @@
-package com.nathan.model.camada.enlace;
+package com.nathan.model.camada.enlace.enquadramento;
+
+import java.util.ArrayList;
+
+import static com.nathan.model.util.FormatFactory.*;
 
 /****************************************************************
  * Autor: Nathan Ferraz da Silva
@@ -13,23 +17,28 @@ package com.nathan.model.camada.enlace;
 public class Framing extends Enquadramento{
 
   @Override
-  public int[] enquadrar(int[] bits) {
+  public ArrayList<int[]> enquadrar(int[] bits) {
+    mensagEnquadrada="";
     char[] mensSemIC = converterEmChar(bits);
-    char[] mensComIC = colocarInformacaoDeControle(mensSemIC);;
-    bits = converterEmBits(mensComIC);
+    ArrayList<char[]> mensComICCharArray = colocarInformacaoDeControle(mensSemIC);
+    ArrayList<int[]> bitsArray = new ArrayList<>();
+    for (int i = 0; i < mensComICCharArray.size(); i++)  bitsArray.add(converterEmBits(mensComICCharArray.get(i)));
+    for (char[] chars : mensComICCharArray) {
+      String quadro = new String(chars);
+      mensagEnquadrada += String.format("[%s] ",quadro);
+    }
 
     mensagemOriginal = new String(mensSemIC);
-    mensagEnquadrada = formatQuadro(mensComIC);
 
-    System.out.println("\nCAMADA DE ENLACE DE DADOS EMISSORA");
-    System.out.print("\tOriginal: " + mensagemOriginal);
-    System.out.println("\n\tEnquadra: " + mensagEnquadrada);
+    System.out.println("\tOriginal: " + mensagemOriginal);
+    System.out.println("\tEnquadra: " + mensagEnquadrada);
 
-    return bits;
+    return bitsArray;
   }
 
   @Override
-  public int[] desenquadrar(int[] bits) {
+  public int[] desenquadrar(ArrayList<int[]> quadros) {
+    int[] bits = juntarQuadro(quadros);
     char[] mensComIC = converterEmChar(bits);
     char[] mensSemIC = removerInformacaoDeControle(mensComIC);
     bits = converterEmBits(mensSemIC);
@@ -37,7 +46,6 @@ public class Framing extends Enquadramento{
     mensagEnquadrada = formatQuadro(mensComIC);
     mensagemOriginal = new String(mensSemIC);
 
-    System.out.println("\n\nCAMADA DE ENLACE DE DADOS RECEPTORA");
     System.out.print("\tEnquadra: " + mensagEnquadrada);
     System.out.print("\n\tOriginal: " + mensagemOriginal+"\n");
 
@@ -49,7 +57,8 @@ public class Framing extends Enquadramento{
    * @param mensagem
    * @return
    */
-  private char[] colocarInformacaoDeControle(char[] mensagem){
+  private ArrayList<char[]> colocarInformacaoDeControle(char[] mensagem){
+    ArrayList<char[]> quadros = new ArrayList<>();
     // CRIA UM VETOR COM As IC - INFORMACAO DE CONTROLE //
     int[] ic;
     int qts = mensagem.length / (quadroSize - 1);
@@ -64,20 +73,26 @@ public class Framing extends Enquadramento{
     }
 
     // COLOCA A INFORMACAO DE CONTROLE E SEU RESPECTIVO INDICE //
+    String novaMen = "";
     char[] novaMensagem = new char[mensagem.length+ic.length];
     int i_ic = 0;
     int i_bits = 0;
     for (int i = 0; i < novaMensagem.length; i++) {
       if(i % quadroSize == 0){
         novaMensagem[i] = Character.forDigit(ic[i_ic],10);
+        novaMen += novaMensagem[i];
         i_ic++;
-      }
-      else{
+      }else{
         novaMensagem[i] = mensagem[i_bits];
+        novaMen += novaMensagem[i];
         i_bits++;
+        if(i % quadroSize == quadroSize-1 || i == novaMensagem.length-1){
+          quadros.add(novaMen.toCharArray());
+          novaMen = "";
+        }
       }
     }
-    return novaMensagem;
+    return quadros;
   }
 
   /**
@@ -133,40 +148,4 @@ public class Framing extends Enquadramento{
   }
 
 
-  protected int[] converterEmBits(char[] chars){
-    int[] ascii = new int[chars.length];
-    String[] binaryStrings = new String[chars.length];
-    int[] bits = new int[chars.length * 7];
-
-    // Converte cada caractere em seu valor da tabela ASCII
-    for (int i = 0; i < chars.length; i++)
-      ascii[i] = chars[i];
-
-    // Converte cada valor ASCII em Binario - SAO NECESSARIO 7 CASAS DECIMAIS PARA CADA CHAR
-    String mensagemCodificada = "";
-    for (int i = 0; i < ascii.length; i++) {
-      String binaryString = Integer.toBinaryString(ascii[i]);
-      binaryStrings[i] = String.format("%07d",Integer.valueOf(binaryString));
-      mensagemCodificada += binaryStrings[i];
-    }
-
-    char[] bitsChar = mensagemCodificada.toCharArray();
-    for (int i = 0; i < bits.length; i++) {
-      bits[i] = Character.getNumericValue(bitsChar[i]);
-    }
-    return bits;
-  }
-  protected char[] converterEmChar(int[] bits){
-    String mensagem = "";
-    String letra = "";
-    for (int i = 0; i < bits.length; i++) {
-      letra += bits[i];
-      if(letra.length() % 7 == 0){
-        int ascii = Integer.parseInt(letra,2);
-        mensagem += ((char) ascii);
-        letra = "";
-      }
-    }
-    return mensagem.toCharArray();
-  }
 }

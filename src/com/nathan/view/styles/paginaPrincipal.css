@@ -5,12 +5,22 @@
 
 .search-text-input{
     -fx-background-color: rgba(0,0,0,0);
+
 }
 
 .search-button{
-    -fx-background-color: #828282;
+    -fx-background-color: #0096C9;
     -fx-background-radius: 30;
 }
+
+.search-button:hover{
+    -fx-background-color: #005E7D;
+}
+
+.search-button:pressed{
+    -fx-background-color: #5198B0;
+}
+
 
 .right-bar{
     -fx-background-color: #d3d3d3;
@@ -28,3 +38,19 @@
 .menu-button{
     -fx-background-color: #FFFFFF;
 }
+
+
+
+.menu-button:hover{
+        -fx-background-color:#0096C9;
+        -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 5, 0.0 , 0 , 1 );
+        -fx-text-alignment: center;
+}
+
+
+.menu-button:pressed{
+        -fx-background-color:#005E7D;
+        -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 1, 0.0 , 0 , 1 );
+}
+
+

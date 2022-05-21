@@ -1,6 +1,6 @@
 package com.nathan.model.camada.fisica;
 
-import com.nathan.model.camada.enlace.VioladorDeCamadaFisica;
+import com.nathan.model.camada.enlace.enquadramento.VioladorDeCamadaFisica;
 
 /****************************************************************
  * Autor: Nathan Ferraz da Silva
